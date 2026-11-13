@@ -26,8 +26,8 @@ export const CONFIG = {
 
   // Aset merek
   img: {
-    maskot: '/assets/images/brand/maskot.webp',
-    fallbackProduk: '/assets/images/brand/logo-arto-printing.webp',
+    maskot: 'https://drive.dekeku.my.id/storage/old/artoprinting/brand/maskot.webp',
+    fallbackProduk: 'https://drive.dekeku.my.id/storage/old/artoprinting/brand/logo-arto-printing.webp',
   },
 
   // Katalog di beranda
