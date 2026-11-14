@@ -33,6 +33,7 @@ HALAMAN = [
     "laman/testimoni/index.html",
     "laman/kontak/index.html",
     "laman/produk/index.html",
+    "post/cetak-kalender-2027-purbalingga.html",
     "post/percetakan-murah-purbalingga.html",
     "404.html",
 ]
@@ -47,7 +48,7 @@ def baca_partial(nama):
     if not f.exists():
         raise SystemExit(f"Partial tidak ditemukan: {f.relative_to(ROOT)}")
     isi = f.read_text(encoding="utf-8")
-    return isi if isi.endswith("\n") else isi + "\n"
+    return isi.rstrip("\r\n") + "\n"
 
 
 def validasi_marker(teks, rel):

@@ -1,8 +1,8 @@
 // tamu-undangan/script.js — membuat link undangan per tamu + pesan WhatsApp.
 //
 // Dipakai oleh dua halaman dengan "mode" berbeda (ditulis di atribut data-mode pada tombol):
-//   index.html     -> mode "link"  : spasi di nama jadi "_" ; tombol Salin menyalin LINK undangan
-//   generator.html -> mode "pesan" : spasi di nama jadi "+" ; tombol Salin menyalin seluruh PESAN
+//   Kedua halaman: tombol Salin menyalin seluruh PESAN undangan personal.
+// Nama tamu pada kedua mode memakai tanda "+" sebagai pengganti spasi di URL.
 //
 // Bergantung pada showAlert() dari berbagi-koding/js/utils@v1.js (dimuat lebih dulu di <head>).
 // Bila skrip itu gagal dimuat, pesan tampil lewat alert() biasa.
@@ -12,41 +12,35 @@
 (function () {
   'use strict';
 
-  var MODE = {
-    link: { pemisahNama: '_', salin: 'link' },
-    pesan: { pemisahNama: '+', salin: 'pesan' },
-  };
-
-  var TEMPLATE_PESAN = {
-    pernikahan: function (d) {
-      return 'Assalamu’alaikum Warahmatullahi Wabarakatuh.\n\n' +
-        'Dengan memohon rahmat dan ridho Allah SWT, kami mengundang ' + d.nama + ' untuk menghadiri acara pernikahan kami.\n\n' +
-        'Link Undangan:\n' + d.link + '\n\n' +
-        'Merupakan kehormatan dan kebahagiaan bagi kami apabila berkenan hadir dan memberikan doa restu.\n\n' +
-        'Wassalamu’alaikum Warahmatullahi Wabarakatuh.\n\n' +
-        'Hormat kami,\n' + d.pengundang;
-    },
-    khitan: function (d) {
-      return 'Assalamu’alaikum Warahmatullahi Wabarakatuh.\n\n' +
-        'Dengan memohon rahmat dan ridho Allah SWT, kami mengundang ' + d.nama + ' untuk hadir dalam acara tasyakuran khitan anak kami.\n\n' +
-        'Link Undangan:\n' + d.link + '\n\n' +
-        'Kehadiran dan doa restu akan menjadi kebahagiaan tersendiri bagi kami.\n\n' +
-        'Wassalamu’alaikum Warahmatullahi Wabarakatuh.\n\n' +
-        'Hormat kami,\n' + d.pengundang;
-    },
-  };
-
   /**
    * Nama tamu untuk parameter ?to=
-   *  - mode link : "Bapak Rudi" -> "Bapak_Rudi"
-   *  - mode pesan: "Bapak Rudi" -> "Bapak+Rudi"  (tanda + = spasi pada URL)
+   *  - kedua mode : "Bapak Rudi" -> "Bapak+Rudi" (tanda + = spasi pada URL)
    * Karakter khusus (&, ?, #, dll.) tetap di-encode supaya link tidak terpotong.
    */
-  function kodeNama(nama, mode) {
-    if (mode.pemisahNama === '+') {
-      return encodeURIComponent(nama.replace(/\s+/g, ' ')).replace(/%20/g, '+');
-    }
-    return encodeURIComponent(nama.replace(/\s+/g, mode.pemisahNama));
+  function kodeNama(nama) {
+    // Dalam query string, tanda "+" dibaca sebagai spasi oleh URLSearchParams.
+    return encodeURIComponent(nama.replace(/\s+/g, ' ')).replace(/%20/g, '+');
+  }
+
+  function templateAwal(jenis) {
+    var pembuka = 'Assalamu’alaikum Warahmatullahi Wabarakatuh.\n\n';
+    var isi = jenis === 'pernikahan'
+      ? 'Dengan memohon rahmat dan ridho Allah SWT, kami mengundang {{nama}} untuk menghadiri acara pernikahan kami.\n\n'
+      : 'Dengan memohon rahmat dan ridho Allah SWT, kami mengundang {{nama}} untuk hadir dalam acara tasyakuran khitan anak kami.\n\n';
+    var penutup = jenis === 'pernikahan'
+      ? 'Merupakan kehormatan dan kebahagiaan bagi kami apabila berkenan hadir dan memberikan doa restu.\n\n'
+      : 'Kehadiran dan doa restu akan menjadi kebahagiaan tersendiri bagi kami.\n\n';
+    return pembuka + isi + 'Link Undangan:\n{{link}}\n\n' + penutup +
+      'Wassalamu’alaikum Warahmatullahi Wabarakatuh.\n\nHormat kami,\n{{pengundang}}';
+  }
+
+  function buatPesan(data) {
+    var editor = document.getElementById('template-pesan');
+    var template = editor && editor.value.trim() ? editor.value : templateAwal(document.getElementById('jenis').value);
+    return template
+      .split('{{nama}}').join(data.nama)
+      .split('{{link}}').join(data.link)
+      .split('{{pengundang}}').join(data.pengundang);
   }
 
   function tampilkanPesan(pesan, jenis, durasi) {
@@ -65,8 +59,17 @@
     return e;
   }
 
+  function simpanDaftar(namaArray) {
+    var params = new URLSearchParams({
+      jenis: nilai('jenis'),
+      nama: namaArray.join(', '),
+      link: nilai('link'),
+      pengundang: nilai('pengundang')
+    });
+    window.history.replaceState({}, '', location.pathname + '#' + params.toString());
+  }
+
   function buatTabel(modeNama) {
-    var mode = MODE[modeNama] || MODE.link;
     var jenis = document.getElementById('jenis').value;
     var namaInput = nilai('nama');
     var pengundang = nilai('pengundang');
@@ -75,62 +78,108 @@
     if (!namaInput) return tampilkanPesan('Nama tamu tidak boleh kosong', 'error');
 
     var namaArray = namaInput.split(',').map(function (n) { return n.trim(); }).filter(Boolean);
-    if (namaArray.length === 0) return window.alert('Silakan isi minimal satu nama.');
+    if (namaArray.length === 0) return tampilkanPesan('Silakan isi minimal satu nama.', 'error');
 
-    var table = el('table', 'w-full text-sm text-left border border-sky-300 bg-white rounded-lg overflow-hidden');
-    var thead = el('thead', 'bg-sky-100 text-sky-700');
+    var hasil = document.getElementById('hasil');
+    hasil.innerHTML = '';
+
+    var toolbar = el('div', 'invite-results-toolbar');
+    var ringkasan = el('p', 'invite-results-count', namaArray.length + ' tamu tersimpan');
+    var hapusSemua = el('button', 'btn btn-line btn-sm invite-delete-all', 'Hapus semua');
+    hapusSemua.type = 'button';
+    hapusSemua.addEventListener('click', function () {
+      if (!window.confirm('Hapus seluruh daftar tamu tersimpan?')) return;
+      document.getElementById('nama').value = '';
+      hasil.innerHTML = '';
+      hasil.appendChild(el('p', 'invite-empty-state', 'Daftar tamu sudah dikosongkan.'));
+      simpanDaftar([]);
+      tampilkanPesan('Semua daftar tamu berhasil dihapus.', 'success', '3000');
+    });
+    toolbar.appendChild(ringkasan);
+    toolbar.appendChild(hapusSemua);
+    hasil.appendChild(toolbar);
+
+    hasil.appendChild(el('p', 'invite-table-hint', 'Geser tabel ke samping untuk melihat semua aksi.'));
+
+    var tableWrap = el('div', 'ui-table-wrap');
+    tableWrap.tabIndex = 0;
+    tableWrap.setAttribute('role', 'region');
+    tableWrap.setAttribute('aria-label', 'Daftar tamu dan aksi, geser horizontal jika diperlukan');
+    var table = el('table', 'ui-table invite-guest-table');
+    var thead = el('thead');
     var trHead = el('tr');
-    ['Nama Tamu', 'Salin', 'WhatsApp'].forEach(function (h) { trHead.appendChild(el('th', 'px-4 py-2', h)); });
+    ['Nama tamu', 'Aksi'].forEach(function (h) {
+      var th = el('th', '', h);
+      th.scope = 'col';
+      trHead.appendChild(th);
+    });
     thead.appendChild(trHead);
     var tbody = el('tbody');
 
+    function perbaruiDaftar() {
+      var tersisa = Array.prototype.map.call(tbody.querySelectorAll('tr'), function (row) {
+        return row.getAttribute('data-guest-name');
+      });
+      document.getElementById('nama').value = tersisa.join(', ');
+      ringkasan.textContent = tersisa.length + ' tamu tersimpan';
+      simpanDaftar(tersisa);
+      if (!tersisa.length) {
+        hasil.innerHTML = '';
+        hasil.appendChild(el('p', 'invite-empty-state', 'Semua tamu telah dihapus dari daftar.'));
+      }
+    }
+
     namaArray.forEach(function (nama) {
-      var linkUndangan = link + '?to=' + kodeNama(nama, mode);
-      var template = TEMPLATE_PESAN[jenis] || TEMPLATE_PESAN.khitan;
-      var pesan = template({ nama: nama, link: linkUndangan, pengundang: pengundang });
+      var linkUndangan = link + '?to=' + kodeNama(nama);
+      var pesan = buatPesan({ nama: nama, link: linkUndangan, pengundang: pengundang });
+      var tr = el('tr', 'invite-guest-row');
+      tr.setAttribute('data-guest-name', nama);
 
-      var tr = el('tr', 'border-t');
-      tr.appendChild(el('td', 'px-4 py-2', nama));
+      var tdNama = el('th', 'invite-guest-name', nama);
+      tdNama.scope = 'row';
+      tr.appendChild(tdNama);
 
-      var tdSalin = el('td', 'px-4 py-2');
-      var btnSalin = el('button', 'bg-sky-500 hover:bg-sky-600 text-white px-3 py-1 rounded', 'Salin');
+      var tdAksi = el('td', 'invite-guest-actions');
+
+      var btnSalin = el('button', 'btn btn-line btn-sm invite-copy', 'Salin');
       btnSalin.type = 'button';
       btnSalin.addEventListener('click', function () {
-        var teks = mode.salin === 'pesan' ? pesan : linkUndangan;
+        var teks = pesan;
         var gagal = function () { window.prompt('Salin secara manual:', teks); };
         if (!navigator.clipboard || !window.isSecureContext) return gagal();
-        // pesan sukses hanya tampil bila penyalinan benar-benar berhasil
         navigator.clipboard.writeText(teks).then(function () {
-          tampilkanPesan('Link untuk ' + nama + ' berhasil disalin', 'success', '3000');
+          tampilkanPesan('Pesan undangan untuk ' + nama + ' berhasil disalin', 'success', '3000');
         }, gagal);
       });
-      tdSalin.appendChild(btnSalin);
-      tr.appendChild(tdSalin);
 
-      var tdWa = el('td', 'px-4 py-2');
-      var a = el('a');
+      var a = el('a', 'btn btn-wa btn-sm invite-whatsapp', 'Kirim');
       a.href = 'https://wa.me/?text=' + encodeURIComponent(pesan);
       a.target = '_blank';
       a.rel = 'noopener';
-      // struktur <a><button> dipertahankan agar tampilan tombol sama seperti sebelumnya
-      var btnWa = el('button', 'bg-green-500 hover:bg-green-600 text-white px-3 py-1 rounded focus:outline-none focus:ring-2 focus:ring-green-400', 'Kirim');
-      btnWa.type = 'button';
-      a.appendChild(btnWa);
-      tdWa.appendChild(a);
-      tr.appendChild(tdWa);
 
+      var btnHapus = el('button', 'btn btn-line btn-sm invite-delete', 'Hapus');
+      btnHapus.type = 'button';
+      btnHapus.setAttribute('aria-label', 'Hapus ' + nama + ' dari daftar');
+      btnHapus.addEventListener('click', function () {
+        tr.remove();
+        perbaruiDaftar();
+        tampilkanPesan('Tamu ' + nama + ' dihapus dari daftar.', 'success', '2500');
+      });
+
+      tdAksi.appendChild(btnSalin);
+      tdAksi.appendChild(a);
+      tdAksi.appendChild(btnHapus);
+      tr.appendChild(tdAksi);
       tbody.appendChild(tr);
     });
 
+    var caption = el('caption', 'sr-only', 'Daftar link undangan personal untuk setiap tamu');
+    table.appendChild(caption);
     table.appendChild(thead);
     table.appendChild(tbody);
-    var hasil = document.getElementById('hasil');
-    hasil.innerHTML = '';
-    hasil.appendChild(table);
-
-    // simpan isian di URL supaya bisa dibagikan / dibuka ulang
-    var params = new URLSearchParams({ jenis: jenis, nama: namaArray.join(', '), link: link, pengundang: pengundang });
-    window.history.replaceState({}, '', location.pathname + '#' + params.toString());
+    tableWrap.appendChild(table);
+    hasil.appendChild(tableWrap);
+    simpanDaftar(namaArray);
   }
 
   function modeHalaman() {
@@ -169,6 +218,27 @@
 
   document.addEventListener('DOMContentLoaded', function () {
     var tombol = document.getElementById('buat-link');
+    var editor = document.getElementById('template-pesan');
+    var resetTemplate = document.getElementById('reset-template');
+    var jenis = document.getElementById('jenis');
+    var templateDiubah = false;
+
+    if (editor) {
+      editor.value = templateAwal(jenis ? jenis.value : 'khitan');
+      editor.addEventListener('input', function () { templateDiubah = true; });
+    }
+    if (jenis) {
+      jenis.addEventListener('change', function () {
+        if (editor && !templateDiubah) editor.value = templateAwal(jenis.value);
+      });
+    }
+    if (resetTemplate && editor) {
+      resetTemplate.addEventListener('click', function () {
+        editor.value = templateAwal(jenis ? jenis.value : 'khitan');
+        templateDiubah = false;
+        editor.focus();
+      });
+    }
     if (tombol) tombol.addEventListener('click', function () { buatTabel(modeHalaman()); });
     muatDariURL();
   });
