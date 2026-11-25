@@ -1,15 +1,24 @@
 # Website Arto Printing
 
-Situs katalog dan profil **Arto Printing** (percetakan di Bobotsari, Purbalingga):
-katalog 960 desain dan 18 layanan dari `assets/data/produk.json`, detail produk + pesan lewat WhatsApp,
-halaman layanan, cara pesan, testimoni, kontak, artikel blog, dan alat pembuat link tamu undangan.
+Situs katalog dan profil **Arto Printing** (percetakan di Bobotsari, Purbalingga): katalog produk, layanan, cara pemesanan, testimoni, kontak, artikel, dan alat pembuat link tamu undangan.
 
-- **Teknologi:** HTML statis, CSS, dan JavaScript modul (ES modules) bawaan browser. Situs utama tanpa framework/build; CSS generator undangan merupakan hasil kompilasi Tailwind yang sumber build-nya belum tersedia di repository.
+- **Teknologi:** HTML statis, CSS, dan JavaScript ES modules bawaan browser. Situs utama tidak memakai framework atau proses build terpusat.
 - **Hosting:** GitHub Pages dengan domain `www.artoprintingpbg.com`.
-- **Data:** file JSON di `assets/data/`.
+- **Data:** JSON statis di `assets/data/`.
+- **Prinsip pemeliharaan:** pertahankan arsitektur dan fitur yang berjalan; lakukan perubahan secara bertahap, teruji, dan sesuai pola yang sudah ada.
+
+## Peta dokumentasi
+
+| Dokumen | Kegunaan |
+|---|---|
+| [Arsitektur proyek](docs/ARSITEKTUR.md) | Peta halaman, aset, modul, alur data, header/footer, dan pengecualian |
+| [Panduan pengembangan](docs/PANDUAN-PENGEMBANGAN.md) | Alur kerja perubahan, konvensi kode, penambahan halaman/fitur/artikel, dan pemeriksaan |
+| [Panduan deployment](docs/DEPLOYMENT.md) | Checklist rilis GitHub Pages, pemeriksaan pascadeploy, dan pemulihan |
+| [Panduan SEO](docs/SEO.md) | Metadata, canonical, sitemap, robots, JSON-LD, dan pemeriksaan SEO |
+
+README ini tetap menjadi pintu masuk dan ringkasan referensi teknis. Detail prosedur dipisahkan ke dokumen di atas agar lebih mudah dipelihara.
 
 ---
-
 ## Halaman & alamat
 
 Semua alamat memakai **huruf kecil**. Halaman profil dan katalog berada di `laman/`; indeks blog ada di `blog/`, artikel di `post/`, dan alat undangan di `tamu-undangan/`.
