@@ -78,7 +78,7 @@ class Kumpul(HTMLParser):
         a = dict(attrs)
         if "id" in a:
             self.ids.append(a["id"])
-        self.classes.update(a.get("class", "").split())
+        self.classes.update((a.get("class") or "").split())
         if tag == "script" and a.get("type") == "module" and a.get("src"):
             self.module_scripts.append(a["src"])
         for k in ("src", "href"):
