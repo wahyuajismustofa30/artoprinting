@@ -21,6 +21,7 @@ Semua alamat memakai **huruf kecil**. Halaman profil dan katalog berada di `lama
 | Layanan | `/laman/layanan/` | `laman/layanan/index.html` |
 | Cara pesan | `/laman/cara-pesan/` | `laman/cara-pesan/index.html` |
 | Testimoni | `/laman/testimoni/` | `laman/testimoni/index.html` |
+| Struktur Organisasi | `/laman/struktur-organisasi/` | `laman/struktur-organisasi/index.html` |
 | Kontak | `/laman/kontak/` | `laman/kontak/index.html` |
 | Detail produk | `/laman/produk/?p=<slug>&id=<id>` (mis. `?p=undangan-cetak&id=5`) | `laman/produk/index.html` |
 | Blog | `/blog/` | `blog/index.html` |
@@ -59,6 +60,7 @@ Halaman detail menerima `?p=undangan-cetak` maupun `?p=Undangan_Cetak`.
 │   ├── layanan/index.html      layanan di toko (dari data "Layanan")
 │   ├── cara-pesan/index.html   4 langkah pemesanan
 │   ├── testimoni/index.html    semua ulasan Google
+│   ├── struktur-organisasi/    profil tim dan pembagian bidang kerja
 │   ├── kontak/index.html       tentang, admin WhatsApp, alamat, foto toko, peta
 │   └── produk/index.html       detail produk
 ├── blog/index.html              indeks artikel blog
