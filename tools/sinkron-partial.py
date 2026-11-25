@@ -31,6 +31,7 @@ HALAMAN = [
     "laman/layanan/index.html",
     "laman/cara-pesan/index.html",
     "laman/testimoni/index.html",
+    "laman/struktur-organisasi/index.html",
     "laman/kontak/index.html",
     "laman/produk/index.html",
     "post/cetak-kalender-2027-purbalingga.html",
