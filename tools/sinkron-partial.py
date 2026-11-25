@@ -38,6 +38,13 @@ HALAMAN = [
     "post/percetakan-murah-purbalingga.html",
     "404.html",
 ]
+# Halaman dengan header utama tetapi footer khusus (misalnya aplikasi mandiri).
+# Hanya header yang disinkronkan; footer halaman tidak disentuh.
+HALAMAN_HEADER_SAJA = [
+    "master-theme.html",
+    "tamu-undangan/index.html",
+    "tamu-undangan/generator.html",
+]
 
 POLA = re.compile(r"(?P<buka>[ \t]*<!-- partial:(?P<nama>[a-z0-9-]+) -->\n)(?P<isi>.*?)(?P<tutup>[ \t]*<!-- /partial:(?P=nama) -->)", re.S)
 MARKER = re.compile(r"<!--\s*(?P<tutup>/)?partial:(?P<nama>[a-z0-9-]+)\s*-->")
@@ -52,8 +59,8 @@ def baca_partial(nama):
     return isi.rstrip("\r\n") + "\n"
 
 
-def validasi_marker(teks, rel):
-    """Pastikan marker header/footer lengkap, unik, dan tersusun berpasangan."""
+def validasi_marker(teks, rel, wajib=WAJIB):
+    """Pastikan marker yang dikelola halaman lengkap, unik, dan berpasangan."""
     kesalahan = []
     stack = []
     jumlah_buka = {}
@@ -75,7 +82,7 @@ def validasi_marker(teks, rel):
 
     for nama in stack:
         kesalahan.append(f"{rel}: marker pembuka partial:{nama} tidak memiliki penutup")
-    for nama in sorted(WAJIB):
+    for nama in sorted(wajib):
         buka = jumlah_buka.get(nama, 0)
         tutup = jumlah_tutup.get(nama, 0)
         if buka == 0:
@@ -95,10 +102,17 @@ def main():
     kesalahan = []
 
     # Preflight semua halaman sebelum menulis agar sinkronisasi tidak parsial.
-    for rel in HALAMAN:
+    daftar_halaman = (
+        [(rel, WAJIB) for rel in HALAMAN]
+        + [(rel, {"header"}) for rel in HALAMAN_HEADER_SAJA]
+    )
+    for rel, wajib in daftar_halaman:
         path = ROOT / rel
+        if not path.is_file():
+            kesalahan.append(f"{rel}: file halaman tidak ditemukan")
+            continue
         teks = path.read_text(encoding="utf-8")
-        kesalahan.extend(validasi_marker(teks, rel))
+        kesalahan.extend(validasi_marker(teks, rel, wajib))
         halaman.append((rel, path, teks))
 
     if kesalahan:
