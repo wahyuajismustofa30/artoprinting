@@ -116,7 +116,7 @@ def cek_html():
                     menu_siap = True
                     break
                 isi_modul = modul.read_text(encoding="utf-8")
-                if re.search(r"(?:from\\s*|import\\s*)['\"][^'\"]*core/site\\.js['\"]", isi_modul):
+                if re.search(r"^\s*import\b.*core/site\.js", isi_modul, re.M):
                     menu_siap = True
                     break
             if not menu_siap:
