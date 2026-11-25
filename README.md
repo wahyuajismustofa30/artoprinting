@@ -108,7 +108,7 @@ Halaman detail menerima `?p=undangan-cetak` maupun `?p=Undangan_Cetak`.
 ├── docs/                       dokumentasi arsitektur, pengembangan, deployment, dan SEO
 ├── tools/
 │   ├── sinkron-partial.py      salin partials/ ke halaman terdaftar
-│   └── cek-proyek.py           periksa tautan, aset, data, partial sebelum deploy
+│   └── cek-proyek.py           periksa tautan, aset, data, partial, dan inisialisasi menu
 └── README.md
 ```
 
