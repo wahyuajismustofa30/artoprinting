@@ -16,6 +16,7 @@ Yang diperiksa:
      status HTTP dan Content-Type dengan timeout serta jumlah worker terbatas.
   5. Link internal produk.json (link_produk /produk.html?p=..&id=..) menunjuk data yang ada.
   6. Header/footer di setiap halaman sama dengan partials/ (lewat sinkron-partial.py --cek).
+  7. Halaman dengan tombol menu memuat inisialisasi core/site.js (langsung atau lewat modul halaman).
 
 Keluar dengan kode 1 bila ada masalah lokal atau URL eksternal yang terkonfirmasi
 menghasilkan HTTP 404/410. Kegagalan jaringan lain dilaporkan sebagai gagal
@@ -70,11 +71,16 @@ class Kumpul(HTMLParser):
         super().__init__()
         self.refs = []
         self.ids = []
+        self.classes = set()
+        self.module_scripts = []
 
     def handle_starttag(self, tag, attrs):
         a = dict(attrs)
         if "id" in a:
             self.ids.append(a["id"])
+        self.classes.update(a.get("class", "").split())
+        if tag == "script" and a.get("type") == "module" and a.get("src"):
+            self.module_scripts.append(a["src"])
         for k in ("src", "href"):
             if a.get(k):
                 if tag == "link" and a.get("rel") in ("preconnect", "canonical"):
@@ -100,6 +106,24 @@ def cek_html():
             continue
         p = Kumpul()
         p.feed(f.read_text(encoding="utf-8"))
+        if "menu-btn" in p.classes:
+            menu_siap = False
+            for src in p.module_scripts:
+                modul = resolve(src, f)
+                if modul is None or not modul.is_file():
+                    continue
+                if modul.resolve() == (ROOT / "assets/js/core/site.js").resolve():
+                    menu_siap = True
+                    break
+                isi_modul = modul.read_text(encoding="utf-8")
+                if re.search(r"(?:from\\s*|import\\s*)['\"][^'\"]*core/site\\.js['\"]", isi_modul):
+                    menu_siap = True
+                    break
+            if not menu_siap:
+                masalah.append(
+                    f"{rel(f)}: tombol menu ditemukan tetapi core/site.js tidak dimuat "
+                    "langsung atau melalui modul halaman"
+                )
         dup = {i for i in p.ids if p.ids.count(i) > 1}
         if dup:
             masalah.append(f"{rel(f)}: id ganda {sorted(dup)}")
