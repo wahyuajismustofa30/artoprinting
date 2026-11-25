@@ -95,11 +95,11 @@ Sumber header/footer ada di `partials/header.html` dan `partials/footer.html`. H
 <!-- /partial:header -->
 ```
 
-Script `tools/sinkron-partial.py` mengganti isi di antara marker berdasarkan file pada `partials/`. Daftar halaman yang dikelola berada di konstanta `HALAMAN`; setiap halaman dalam daftar saat ini diwajibkan memiliki marker header dan footer.
+Script `tools/sinkron-partial.py` mengganti isi di antara marker berdasarkan file pada `partials/`. Halaman dengan header dan footer standar terdaftar pada `HALAMAN` dan wajib memiliki kedua marker. Halaman dengan header utama tetapi footer khusus terdaftar pada `HALAMAN_HEADER_SAJA` dan hanya wajib memiliki marker header.
 
-**Pengecualian yang diketahui:** `master-theme.html`, `tamu-undangan/index.html`, dan `tamu-undangan/generator.html` memakai markup header utama tetapi belum memiliki marker partial. Header di halaman ini belum tersinkron otomatis. Jangan menyimpulkan semua halaman telah dikelola oleh script hanya karena tampilannya memakai header utama.
+`master-theme.html`, `tamu-undangan/index.html`, dan `tamu-undangan/generator.html` menggunakan kategori header-saja: header utama tersinkron otomatis, sementara footer demo/aplikasi tetap dipertahankan sebagai markup khusus.
 
-Halaman dengan header interaktif juga harus memuat `assets/js/core/site.js`, secara langsung atau melalui modul halaman. Saat audit dokumentasi ini, halaman struktur organisasi belum memuat modul tersebut secara eksplisit; perilaku menu di halaman itu perlu diverifikasi dan diperbaiki terpisah.
+Halaman dengan tombol `.menu-btn` harus memuat `assets/js/core/site.js`, secara langsung atau melalui entry point halaman. Validator `tools/cek-proyek.py` memeriksa pemuatan langsung atau import `core/site.js` dari modul halaman. Halaman struktur organisasi kini memuat modul tersebut secara langsung.
 
 ## 7. Pengalihan URL
 
