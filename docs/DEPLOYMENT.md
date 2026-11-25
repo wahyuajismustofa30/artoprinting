@@ -33,7 +33,7 @@ python tools/sinkron-partial.py
 python tools/sinkron-partial.py --cek
 ```
 
-Script hanya memeriksa halaman yang terdaftar di `HALAMAN`. Saat ini `master-theme.html`, `tamu-undangan/index.html`, dan `tamu-undangan/generator.html` belum memakai marker partial; perubahan header pada halaman tersebut perlu diperiksa manual.
+Script memeriksa halaman standar di `HALAMAN` (header dan footer) serta halaman header-saja di `HALAMAN_HEADER_SAJA`. Footer khusus pada halaman demo dan aplikasi undangan tidak disentuh.
 
 ### C. Validasi proyek
 
