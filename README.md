@@ -289,9 +289,9 @@ konten dan metadata tetap ditulis langsung pada HTML statis.
 3. Jalankan `python tools/sinkron-partial.py --cek` untuk memastikan hasil sinkron.
 4. Jangan edit isi di antara marker partial langsung di halaman.
 
-**Batasan sinkronisasi saat ini:** script hanya mengelola halaman yang tercantum di `HALAMAN` dan mewajibkan marker header serta footer. `master-theme.html`, `tamu-undangan/index.html`, dan `tamu-undangan/generator.html` saat ini memakai header utama tetapi belum memiliki marker partial, sehingga header pada ketiga halaman tersebut belum diperbarui otomatis oleh script. Periksa ketiganya secara manual bila sumber header berubah.
+**Cakupan sinkronisasi:** halaman utama yang memiliki footer standar tercantum di `HALAMAN` dan menyinkronkan header serta footer. `master-theme.html`, `tamu-undangan/index.html`, dan `tamu-undangan/generator.html` tercantum di `HALAMAN_HEADER_SAJA`; ketiganya menyinkronkan header utama saja agar footer demo/aplikasi tetap khusus. Seluruh halaman tersebut sekarang memakai marker partial dan diperiksa oleh `python tools/sinkron-partial.py --cek`.
 
-Menu utama dijalankan oleh `assets/js/core/site.js` melalui `components/site-menu.js`. Setiap halaman yang memakai header interaktif harus memuat `site.js` secara langsung atau melalui modul halaman. Halaman struktur organisasi saat ini belum memuat modul tersebut secara eksplisit dan perlu ditinjau; lihat [arsitektur proyek](docs/ARSITEKTUR.md).
+Menu utama dijalankan oleh `assets/js/core/site.js` melalui `components/site-menu.js`. Semua halaman dengan tombol `.menu-btn` harus memuat `site.js` secara langsung atau melalui modul halaman. Validator `tools/cek-proyek.py` kini memeriksa syarat tersebut; lihat [arsitektur proyek](docs/ARSITEKTUR.md).
 
 ## Menambah halaman baru (contoh: `/laman/galeri/`)
 
