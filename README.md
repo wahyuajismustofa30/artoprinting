@@ -117,30 +117,15 @@ Repository tidak memiliki direktori `assets/images/`. Aset gambar yang disimpan 
 
 URL gambar eksternal yang sudah digunakan merupakan bagian dari konfigurasi konten situs. Jangan mengganti, memindahkan, atau memigrasikannya tanpa kebutuhan teknis yang jelas dan persetujuan.
 
-Perintah `python tools/cek-proyek.py --tulis-daftar-gambar` mengumpulkan URL eksternal dari atribut `src` elemen gambar di HTML dan field `img` dalam `assets/data/produk.json`. Hasilnya adalah daftar referensi URL yang ditemukan oleh script, bukan inventaris seluruh file gambar yang tersimpan di server eksternal. Direktori `docs/` beserta file daftar tersebut dibuat otomatis saat perintah dijalankan; keduanya tidak harus tersedia di repository.
+Perintah `python tools/cek-proyek.py --tulis-daftar-gambar` mengumpulkan URL eksternal dari atribut `src` elemen gambar di HTML dan field `img` dalam `assets/data/produk.json`. Hasilnya adalah daftar referensi URL yang ditemukan oleh script, bukan inventaris seluruh file gambar yang tersimpan di server eksternal. File `docs/daftar-gambar-produk.txt` dibuat atau diperbarui otomatis saat perintah dijalankan. Direktori `docs/` juga menyimpan dokumentasi proyek yang dipelihara di repository; file daftar gambar bersifat hasil generate dan tidak perlu di-commit kecuali memang dibutuhkan.
 
-### Urutan pemuatan di setiap halaman
+### Urutan pemuatan di halaman utama
 
-```html
-<head>
-  ... meta SEO / Open Graph / canonical ...
-  <link rel="stylesheet" href="/assets/css/base.css">
-  <link rel="stylesheet" href="/assets/css/layout.css">
-  <link rel="stylesheet" href="/assets/css/components.css">
-  <link rel="stylesheet" href="/assets/css/pages/<halaman>.css">
-  <script src="/assets/js/core/analytics.js"></script>
-  <script src="/assets/js/core/redirect-www.js"></script>
-</head>
-<body>
-  <!-- partial:header --> ... <!-- /partial:header -->
-  <main> ... </main>
-  <!-- partial:footer --> ... <!-- /partial:footer -->
-  <script type="module" src="/assets/js/pages/<halaman>.js"></script>   (atau core/site.js)
-</body>
-```
+Urutan umum stylesheet adalah `base.css`, `layout.css`, `components.css`, lalu CSS khusus halaman. Script analytics dan redirect www dimuat sebagai script biasa; perilaku menu dan share dimuat melalui `core/site.js`, langsung atau melalui entry point halaman.
 
-Semua path diawali `/` (absolut dari root domain), jadi file HTML di dalam folder (`laman/katalog/index.html`)
-memakai aset yang sama tanpa `../`.
+Halaman yang dikelola oleh sinkronisasi header/footer menggunakan marker partial. Tidak semua halaman saat ini memakai marker tersebut; lihat [arsitektur proyek](docs/ARSITEKTUR.md) untuk pengecualian yang diketahui.
+
+Semua path aset internal diawali `/` (absolut dari root domain), sehingga halaman di dalam folder dapat menggunakan path yang sama tanpa `../`.
 
 ---
 
@@ -298,11 +283,14 @@ konten dan metadata tetap ditulis langsung pada HTML statis.
 
 ## Mengubah header / footer
 
-1. Edit `partials/header.html` atau `partials/footer.html`.
-2. Jalankan `python tools/sinkron-partial.py`.
-3. Jangan edit isi di antara `<!-- partial:... -->` dan `<!-- /partial:... -->` langsung di halaman.
+1. Edit sumber di `partials/header.html` atau `partials/footer.html`.
+2. Jalankan `python tools/sinkron-partial.py` untuk memperbarui halaman yang terdaftar di `HALAMAN`.
+3. Jalankan `python tools/sinkron-partial.py --cek` untuk memastikan hasil sinkron.
+4. Jangan edit isi di antara marker partial langsung di halaman.
 
-Menu yang sedang dibuka otomatis ditandai (`aria-current="page"`) oleh `components/site-menu.js`.
+**Batasan sinkronisasi saat ini:** script hanya mengelola halaman yang tercantum di `HALAMAN` dan mewajibkan marker header serta footer. `master-theme.html`, `tamu-undangan/index.html`, dan `tamu-undangan/generator.html` saat ini memakai header utama tetapi belum memiliki marker partial, sehingga header pada ketiga halaman tersebut belum diperbarui otomatis oleh script. Periksa ketiganya secara manual bila sumber header berubah.
+
+Menu utama dijalankan oleh `assets/js/core/site.js` melalui `components/site-menu.js`. Setiap halaman yang memakai header interaktif harus memuat `site.js` secara langsung atau melalui modul halaman. Halaman struktur organisasi saat ini belum memuat modul tersebut secara eksplisit dan perlu ditinjau; lihat [arsitektur proyek](docs/ARSITEKTUR.md).
 
 ## Menambah halaman baru (contoh: `/laman/galeri/`)
 
