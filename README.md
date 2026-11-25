@@ -105,8 +105,9 @@ Halaman detail menerima `?p=undangan-cetak` maupun `?p=Undangan_Cetak`.
 │       └── pages/              titik masuk per halaman: beranda, katalog, layanan, testimoni, produk-detail
 │
 ├── partials/                   SUMBER header & footer bersama
+├── docs/                       dokumentasi arsitektur, pengembangan, deployment, dan SEO
 ├── tools/
-│   ├── sinkron-partial.py      salin partials/ ke semua halaman
+│   ├── sinkron-partial.py      salin partials/ ke halaman terdaftar
 │   └── cek-proyek.py           periksa tautan, aset, data, partial sebelum deploy
 └── README.md
 ```
