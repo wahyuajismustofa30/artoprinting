@@ -35,10 +35,10 @@ Gunakan halaman yang paling mirip sebagai acuan. Checklist:
 5. Pastikan halaman dengan header interaktif memuat `core/site.js` langsung atau melalui modul halaman.
 6. Bila ada JavaScript khusus, buat entry point di `assets/js/pages/`; letakkan logika reusable di `components/` atau `features/`.
 7. Perbarui navigasi, `config.js`, alias URL di `404.html`/modul terkait, dan `sitemap.xml` bila URL baru perlu diindeks.
-8. Tambahkan halaman ke `HALAMAN` di `tools/sinkron-partial.py` hanya jika halaman memakai marker header/footer yang dikelola script.
+8. Tambahkan halaman ke `HALAMAN` bila memakai header dan footer standar; gunakan `HALAMAN_HEADER_SAJA` bila halaman memakai header utama tetapi footer khusus. Tambahkan marker yang sesuai.
 9. Jalankan validator dan tinjau tampilan desktop serta mobile.
 
-Catatan: tiga halaman saat ini memakai header utama tetapi belum masuk sinkronisasi marker: `master-theme.html`, `tamu-undangan/index.html`, dan `tamu-undangan/generator.html`. Konsistensi markup dan mekanisme sinkronisasi untuk halaman tersebut masih merupakan pekerjaan teknis terpisah.
+Catatan: `master-theme.html`, `tamu-undangan/index.html`, dan `tamu-undangan/generator.html` sudah dikelola melalui `HALAMAN_HEADER_SAJA`; footer khususnya tidak diganti saat sinkronisasi.
 
 ## 4. Mengubah header/footer
 
@@ -46,7 +46,7 @@ Catatan: tiga halaman saat ini memakai header utama tetapi belum masuk sinkronis
 2. Jalankan `python tools/sinkron-partial.py`.
 3. Jalankan `python tools/sinkron-partial.py --cek`.
 4. Periksa diff untuk memastikan hanya blok yang dikelola yang berubah.
-5. Periksa halaman yang belum memakai marker secara terpisah.
+5. Periksa halaman khusus yang memakai footer berbeda; sinkronisasi header tidak boleh mengubah footer tersebut.
 
 Jangan mengedit blok di antara marker langsung pada halaman karena perubahan akan tertimpa saat sinkronisasi berikutnya.
 
